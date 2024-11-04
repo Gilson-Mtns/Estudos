@@ -124,6 +124,56 @@ void insertionSort(node *head){
         }
     }
 }
+
+void swapValue(node *n1, node *n2){
+    int valorTemp = n1->valor;
+    n1->valor = n2->valor;
+    n2->valor = valorTemp;
+    return;
+}
+
+void quickSort(node *head){
+    node *pivot = head;
+    node *left = NULL;
+    node *right = pivot->ptr_next;
+    while(left == NULL && right != NULL){
+        if(right->valor < pivot->valor){
+            swapValue(right, pivot);
+        }
+        right = right->ptr_next;
+    }
+    pivot = pivot->ptr_next;
+    left = head;
+    right = pivot->ptr_next;
+    while(pivot->ptr_next != NULL){
+        while(left->ptr_next != pivot && right->ptr_next != NULL){
+            while(left->ptr_next != pivot && left->valor < pivot->valor){
+                left = left->ptr_next;
+            }
+            while(right->ptr_next != NULL && right->valor > pivot->valor){
+                right = right->ptr_next;
+            }
+            if(left->valor > pivot->valor && right->valor < pivot->valor){
+                swapValue(left, right);
+            }
+            if(left->valor > pivot->valor && right->valor >= pivot->valor){
+                swapValue(left, pivot);
+            }
+            if(left->valor <= pivot->valor && right->valor < pivot->valor){
+                swapValue(right, pivot);
+            }
+        }
+        left = head;
+        pivot = pivot->ptr_next;
+        right = pivot->ptr_next;
+    }
+    while(right == NULL & left != pivot){
+        if(left->valor > pivot->valor){
+            swapValue(left, pivot);
+        }
+        left = left->ptr_next;
+    }
+}
     
 int main(){
     node *lista = NULL;
@@ -135,6 +185,6 @@ int main(){
     addNode(lista, 7);
     addNode(lista, 2);
     printList(lista);
-    insertionSort(lista);
+    quickSort(lista);
     printList(lista);
 }
