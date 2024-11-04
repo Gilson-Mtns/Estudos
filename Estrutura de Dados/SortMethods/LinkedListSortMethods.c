@@ -49,58 +49,92 @@ void printList(node *head){ // Itera sobre a lista e printa os valores de cada n
     printf("\n");
 }
 
-/*void bubbleSort(node *head){
+void bubbleSort(node *head){
     int counter = 0;
     node *previous = NULL;
     node *current = head;
     node *temp1 = NULL;
     node *temp2 = NULL;
-    while(current->ptr_next != NULL){
+    while(1){
+        if(head->valor > head->ptr_next->valor){
+            counter++;
+            int valorTemp = head->valor;
+            head->valor = head->ptr_next->valor;
+            head->ptr_next->valor = valorTemp;
+        }
+        if(current->ptr_next == NULL && counter == 0){
+            return;
+        }
+        if(current->ptr_next == NULL && counter != 0){
+            counter = 0;
+            current = head;
+            previous = NULL;
+        }
         if(current->valor > current->ptr_next->valor){
-            counter += 1;
+            counter++;
             temp1 = previous->ptr_next;
             temp2 = current->ptr_next->ptr_next;
             previous->ptr_next = current->ptr_next;
             current->ptr_next->ptr_next = temp1;
             current->ptr_next = temp2;
+            current = previous->ptr_next;
         }
-        previous = current;
-        current = current->ptr_next;
-    }
-    free(temp1);
-    free(temp2);
-    if(counter > 0){
-        return bubbleSort(head);
-    }
-}*/
-// Implementação alterando ponteiros (Código rodando pra sempre)
-
-void bubbleSort(node *head){
-    int counter = 0;
-    node *current = head;
-    int temp = 0;
-
-    while(current->ptr_next != NULL){
-        if(current->valor > current->ptr_next->valor){
-            counter += 1;
-            temp = current->valor;
-            current->valor = current->ptr_next->valor;
-            current->ptr_next->valor = temp;
+        else if(current->valor <= current->ptr_next->valor){
+            previous = current;
+            current = current->ptr_next;
         }
-        current = current->ptr_next;
-    }
-    if(counter > 0){
-        return bubbleSort(head);
     }
 }
 
+void insertionSort(node *head){
+    node *parameter = head->ptr_next;
+    node *comparator = head;
+    node *next = parameter->ptr_next;
+    node *previousParameter = head;
+    node *temp1 = NULL;
+    node *temp2 = NULL;
+    node *temp3 = NULL;
+    while(parameter != NULL){
+        if(head->valor > head->ptr_next->valor){
+            int valorTemp = head->valor;
+            head->valor = head->ptr_next->valor;
+            head->ptr_next->valor = valorTemp;
+        }
+        if(next != NULL && comparator->ptr_next == parameter){
+            previousParameter = parameter;
+            parameter = next;
+            next = next->ptr_next;
+            comparator = head;
+        }
+        if(comparator->ptr_next->valor <= parameter->valor){
+            comparator = comparator->ptr_next;
+        }
+        if(comparator->ptr_next->valor > parameter->valor){
+            temp1 = previousParameter->ptr_next;
+            temp2 = comparator->ptr_next;
+            temp3 = parameter->ptr_next;
+            comparator->ptr_next = temp1;
+            parameter->ptr_next = temp2;
+            previousParameter->ptr_next = temp3;
+            parameter = next;
+            comparator = head;
+            if(next != NULL){
+                next = next->ptr_next;
+            }
+        }
+    }
+}
+    
 int main(){
     node *lista = NULL;
     lista = initList(lista, 3);
     addNode(lista, 8);
-    addNode(lista, 7);
+    addNode(lista, 1);
     addNode(lista, 6);
+    addNode(lista, 12);
+    addNode(lista, 7);
+    addNode(lista, 2);
     printList(lista);
-    bubbleSort(lista);
+    insertionSort(lista);
     printList(lista);
 }
