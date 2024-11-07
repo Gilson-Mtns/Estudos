@@ -40,6 +40,14 @@ void removeNode(node *head, int val){ // Itera sobre a lista buscando o nó com 
     }
 }
 
+node* getTail(node *head){
+    node *current = head;
+    while(current->ptr_next != NULL){
+        current = current->ptr_next;
+    }
+    return current;
+}
+
 void printList(node *head){ // Itera sobre a lista e printa os valores de cada nó
     node *current = head;
     while(current != NULL){
@@ -49,40 +57,32 @@ void printList(node *head){ // Itera sobre a lista e printa os valores de cada n
     printf("\n");
 }
 
+void swapValue(node *n1, node *n2){
+    int valorTemp = n1->valor;
+    n1->valor = n2->valor;
+    n2->valor = valorTemp;
+    return;
+}
+
 void bubbleSort(node *head){
     int counter = 0;
-    node *previous = NULL;
     node *current = head;
-    node *temp1 = NULL;
-    node *temp2 = NULL;
+    if(head == NULL){
+        return;
+    }
     while(1){
-        if(head->valor > head->ptr_next->valor){
-            counter++;
-            int valorTemp = head->valor;
-            head->valor = head->ptr_next->valor;
-            head->ptr_next->valor = valorTemp;
-        }
         if(current->ptr_next == NULL && counter == 0){
             return;
         }
         if(current->ptr_next == NULL && counter != 0){
-            counter = 0;
             current = head;
-            previous = NULL;
+            counter = 0;
         }
         if(current->valor > current->ptr_next->valor){
+            swapValue(current, current->ptr_next);
             counter++;
-            temp1 = previous->ptr_next;
-            temp2 = current->ptr_next->ptr_next;
-            previous->ptr_next = current->ptr_next;
-            current->ptr_next->ptr_next = temp1;
-            current->ptr_next = temp2;
-            current = previous->ptr_next;
         }
-        else if(current->valor <= current->ptr_next->valor){
-            previous = current;
-            current = current->ptr_next;
-        }
+        current = current->ptr_next;
     }
 }
 
@@ -96,9 +96,7 @@ void insertionSort(node *head){
     node *temp3 = NULL;
     while(parameter != NULL){
         if(head->valor > head->ptr_next->valor){
-            int valorTemp = head->valor;
-            head->valor = head->ptr_next->valor;
-            head->ptr_next->valor = valorTemp;
+            swapValue(head, head->ptr_next);
         }
         if(next != NULL && comparator->ptr_next == parameter){
             previousParameter = parameter;
@@ -125,56 +123,81 @@ void insertionSort(node *head){
     }
 }
 
-void swapValue(node *n1, node *n2){
-    int valorTemp = n1->valor;
-    n1->valor = n2->valor;
-    n2->valor = valorTemp;
-    return;
+node *partition(node *head, node *tail){
+    node *pivot = head;
+    node *previous = head;
+    node *current = head;
+    int tempVal = 0;
+    while(current != tail->ptr_next){
+        if(current->valor < pivot->valor){
+            swapValue(current, previous->ptr_next);
+            previous = previous->ptr_next;
+        }
+        current = current->ptr_next;
+    }
+    swapValue(pivot, previous);
+    return previous;
+}
+
+void intermediate(node *head, node *tail){
+    if(head == NULL || head == tail){
+        return;
+    }
+    node *pivot = partition(head, tail);
+    intermediate(head, pivot);
+    intermediate(pivot->ptr_next, tail);
 }
 
 void quickSort(node *head){
-    node *pivot = head;
-    node *left = NULL;
-    node *right = pivot->ptr_next;
-    while(left == NULL && right != NULL){
-        if(right->valor < pivot->valor){
-            swapValue(right, pivot);
+    node *tail = getTail(head);
+    intermediate(head, tail);
+    return;
+}
+
+node *split(node *head){
+    node *end = head;
+    node *middle = head;
+    node *temp = NULL;
+    while(end != NULL && end->ptr_next != NULL){
+        end = end->ptr_next->ptr_next;
+        if(end != NULL){
+            middle = middle->ptr_next;
         }
-        right = right->ptr_next;
     }
-    pivot = pivot->ptr_next;
-    left = head;
-    right = pivot->ptr_next;
-    while(pivot->ptr_next != NULL){
-        while(left->ptr_next != pivot && right->ptr_next != NULL){
-            while(left->ptr_next != pivot && left->valor < pivot->valor){
-                left = left->ptr_next;
-            }
-            while(right->ptr_next != NULL && right->valor > pivot->valor){
-                right = right->ptr_next;
-            }
-            if(left->valor > pivot->valor && right->valor < pivot->valor){
-                swapValue(left, right);
-            }
-            if(left->valor > pivot->valor && right->valor >= pivot->valor){
-                swapValue(left, pivot);
-            }
-            if(left->valor <= pivot->valor && right->valor < pivot->valor){
-                swapValue(right, pivot);
-            }
-        }
-        left = head;
-        pivot = pivot->ptr_next;
-        right = pivot->ptr_next;
-    }
-    while(right == NULL & left != pivot){
-        if(left->valor > pivot->valor){
-            swapValue(left, pivot);
-        }
-        left = left->ptr_next;
-    }
+    temp = middle->ptr_next;
+    middle->ptr_next = NULL;
+    return temp;
 }
     
+node *merge(node *first, node *second){
+    if(first == NULL){
+        return second;
+    }
+    if(second == NULL){
+        return first;
+    }
+    if(first->valor < second->valor){
+        first->ptr_next = merge(first->ptr_next, second);
+        return first;
+    }
+    else{
+        second->ptr_next = merge(first, second->ptr_next);
+        return second;
+    }
+}
+
+node *mergeSort(node *head){
+    if(head == NULL || head->ptr_next == NULL){
+        return head;
+    }
+    node *second = split(head);
+    head = mergeSort(head);
+    second = mergeSort(second);
+    return merge(head, second);
+    //TODO: Tentar utilizar void no retorno da função.
+    //Motivo: Fica feio na main.
+}
+
 int main(){
     node *lista = NULL;
     lista = initList(lista, 3);
@@ -182,9 +205,13 @@ int main(){
     addNode(lista, 1);
     addNode(lista, 6);
     addNode(lista, 12);
+    addNode(lista, 8);
+    addNode(lista, 2);
+    addNode(lista, 85);
+    addNode(lista, 3);
     addNode(lista, 7);
     addNode(lista, 2);
     printList(lista);
-    quickSort(lista);
+    lista = mergeSort(lista);
     printList(lista);
 }
